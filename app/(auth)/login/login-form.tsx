@@ -18,12 +18,15 @@ export default function LoginForm() {
     const supabase = getSupabaseBrowserClient();
 
     try {
+      const redirectBase = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      const nextPath = "/practice";
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_APP_URL
-            ? `${process.env.NEXT_PUBLIC_APP_URL}/practice`
-            : "http://localhost:3000/practice",
+          emailRedirectTo: `${redirectBase}/auth/callback?next=${encodeURIComponent(
+            nextPath,
+          )}`,
         },
       });
 
