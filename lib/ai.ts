@@ -18,6 +18,75 @@ const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === "1";
 
 let client: OpenAI | null = null;
 
+const questionResponseJsonSchema = {
+  type: "object",
+  required: ["questions"],
+  properties: {
+    questions: {
+      type: "array",
+      items: { type: "string" },
+      minItems: 3,
+      maxItems: 3,
+    },
+  },
+  additionalProperties: false,
+} as const;
+
+const evaluationJsonSchema = {
+  type: "object",
+  required: ["scores", "feedback", "tips_next_time"],
+  properties: {
+    scores: {
+      type: "object",
+      required: ["structure", "relevance", "impact", "delivery", "overall"],
+      properties: {
+        structure: { type: "number" },
+        relevance: { type: "number" },
+        impact: { type: "number" },
+        delivery: { type: "number" },
+        overall: { type: "number" },
+      },
+      additionalProperties: false,
+    },
+    feedback: {
+      type: "object",
+      required: ["summary", "by_answer"],
+      properties: {
+        summary: { type: "string" },
+        by_answer: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["improvements", "missing_keywords"],
+            properties: {
+              improvements: {
+                type: "array",
+                items: { type: "string" },
+                maxItems: 5,
+              },
+              missing_keywords: {
+                type: "array",
+                items: { type: "string" },
+                maxItems: 8,
+              },
+            },
+            additionalProperties: false,
+          },
+          minItems: 3,
+          maxItems: 3,
+        },
+      },
+      additionalProperties: false,
+    },
+    tips_next_time: {
+      type: "array",
+      items: { type: "string" },
+      maxItems: 5,
+    },
+  },
+  additionalProperties: false,
+} as const;
+
 function getClient() {
   if (DEV_MODE) {
     return null;
@@ -34,7 +103,25 @@ function getClient() {
   return client;
 }
 
-async function createJsonResponse(system: string, user: string) {
+function buildTextFormat(name: string, schema: unknown) {
+  return {
+    format: {
+      type: "json_schema" as const,
+      name,
+      json_schema: {
+        schema,
+        strict: false,
+      },
+    },
+  };
+}
+
+async function createJsonResponse(
+  system: string,
+  user: string,
+  schemaName: string,
+  schema: unknown,
+) {
   const openai = getClient();
 
   if (!openai) {
@@ -45,11 +132,11 @@ async function createJsonResponse(system: string, user: string) {
     model: "gpt-4o-mini",
     temperature: 0.2,
     max_output_tokens: 1100,
-    response_format: { type: "json_object" },
     input: [
       { role: "system", content: system },
       { role: "user", content: user },
     ],
+    text: buildTextFormat(schemaName, schema),
   });
 
   return response.output_text ?? "";
@@ -103,6 +190,8 @@ export async function generateQuestions(role: string): Promise<QuestionResponseT
 
 Return valid JSON only.`
           : prompt,
+        "question_response",
+        questionResponseJsonSchema,
       ),
     (payload) => QuestionResponse.parse(payload),
   );
@@ -160,6 +249,8 @@ export async function evaluateSession(
 
 Return valid JSON only.`
           : prompt,
+        "evaluation_response",
+        evaluationJsonSchema,
       ),
     (payload) => EvalPayload.parse(payload),
   );
