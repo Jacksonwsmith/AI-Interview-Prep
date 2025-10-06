@@ -103,16 +103,11 @@ function getClient() {
   return client;
 }
 
-function buildTextFormat(name: string, schema: unknown) {
+function buildFormat(name: string, schema: unknown) {
   return {
-    format: {
-      type: "json_schema" as const,
-      name,
-      json_schema: {
-        schema,
-        strict: false,
-      },
-    },
+    type: "json_schema" as const,
+    name,
+    schema,
   };
 }
 
@@ -136,7 +131,9 @@ async function createJsonResponse(
       { role: "system", content: system },
       { role: "user", content: user },
     ],
-    text: buildTextFormat(schemaName, schema),
+    text: {
+      format: buildFormat(schemaName, schema),
+    },
   });
 
   return response.output_text ?? "";
