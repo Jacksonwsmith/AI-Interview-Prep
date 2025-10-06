@@ -8,13 +8,19 @@ const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === "1";
 
 const jobHelperSchema = {
   type: "object",
-  required: ["applicationSummary", "valueProps", "coverLetter", "screeningResponses"],
+  required: [
+    "applicationSummary",
+    "valueProps",
+    "coverLetter",
+    "screeningResponses",
+    "autoFill",
+  ],
   properties: {
     applicationSummary: { type: "string" },
     valueProps: {
       type: "array",
       items: { type: "string" },
-      maxItems: 5,
+      maxItems: 6,
     },
     coverLetter: { type: "string" },
     screeningResponses: {
@@ -29,6 +35,54 @@ const jobHelperSchema = {
         additionalProperties: false,
       },
       maxItems: 5,
+    },
+    autoFill: {
+      type: "object",
+      required: ["coreProfile", "formResponses", "screeningShortForm", "followUpEmail"],
+      properties: {
+        coreProfile: {
+          type: "object",
+          required: ["headline", "oneLiner", "skills"],
+          properties: {
+            headline: { type: "string" },
+            oneLiner: { type: "string" },
+            skills: {
+              type: "array",
+              items: { type: "string" },
+              maxItems: 12,
+            },
+          },
+          additionalProperties: false,
+        },
+        formResponses: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["fieldLabel", "recommendedValue"],
+            properties: {
+              fieldLabel: { type: "string" },
+              recommendedValue: { type: "string" },
+            },
+            additionalProperties: false,
+          },
+          maxItems: 12,
+        },
+        screeningShortForm: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["question", "answer"],
+            properties: {
+              question: { type: "string" },
+              answer: { type: "string" },
+            },
+            additionalProperties: false,
+          },
+          maxItems: 5,
+        },
+        followUpEmail: { type: "string" },
+      },
+      additionalProperties: false,
     },
   },
   additionalProperties: false,
@@ -61,6 +115,24 @@ export async function POST(request: Request) {
         valueProps: ["DEV bullet 1", "DEV bullet 2"],
         coverLetter: "DEV cover letter snippet...",
         screeningResponses: [{ question: "Why this role?", answer: "DEV response." }],
+        autoFill: {
+          coreProfile: {
+            headline: "DEV Headline",
+            oneLiner: "DEV one-liner aligning impact to the role.",
+            skills: ["Leadership", "Go-To-Market"],
+          },
+          formResponses: [
+            {
+              fieldLabel: "Work authorization",
+              recommendedValue: "Authorized to work in US",
+            },
+            { fieldLabel: "Desired salary", recommendedValue: "$190k base + bonus" },
+          ],
+          screeningShortForm: [
+            { question: "Notice period", answer: "Two weeks notice." },
+          ],
+          followUpEmail: "DEV follow-up email body...",
+        },
       });
     }
 
@@ -74,21 +146,22 @@ export async function POST(request: Request) {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const prompt = `You are assisting a candidate applying for the role "${jobTitle}" at "${company}".
-    Job description:
-    ${jobDescription}
+Job description:
+${jobDescription}
 
-    Candidate summary:
-    ${resumeSummary}
+Candidate summary:
+${resumeSummary}
 
-    Focus areas or key achievements to highlight:
-    ${focusAreas ?? "Not specified"}
+Focus areas or key achievements to highlight:
+${focusAreas ?? "Not specified"}
 
-    Produce:
-    - applicationSummary: a concise paragraph (max 120 words) explaining the candidate's fit.
-    - valueProps: 3-5 bullet points tailored to the job.
-    - coverLetter: a short (200-250 word) cover-letter style answer referencing the company.
-    - screeningResponses: 2-3 question/answer pairs for common recruiter screens ("Why this role?", "Biggest impact?", etc.).
-    Return JSON.`;
+Produce JSON with:
+- applicationSummary: concise paragraph (≤120 words) explaining the candidate's fit.
+- valueProps: 3-5 bullet points tailored to the job.
+- coverLetter: a short (200-250 word) cover-letter style answer referencing the company.
+- screeningResponses: 2-3 recruiter-screen Q/A pairs ("Why this role?", "Greatest impact?", etc.).
+- autoFill: structured data for auto-applying, including core profile, recommended form field values, short-form answers, and a follow-up email template.
+Return JSON that matches the provided schema exactly.`;
 
     const response = await openai.responses.create({
       model: "gpt-4o-mini",
@@ -107,6 +180,16 @@ export async function POST(request: Request) {
       valueProps: string[];
       coverLetter: string;
       screeningResponses: { question: string; answer: string }[];
+      autoFill: {
+        coreProfile: {
+          headline: string;
+          oneLiner: string;
+          skills: string[];
+        };
+        formResponses: { fieldLabel: string; recommendedValue: string }[];
+        screeningShortForm: { question: string; answer: string }[];
+        followUpEmail: string;
+      };
     };
 
     try {

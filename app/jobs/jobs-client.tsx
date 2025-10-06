@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Loader2, Sparkles } from "lucide-react";
+import { Clipboard, ClipboardCheck, Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/Button";
 import { useToast } from "@/components/ToastProvider";
@@ -12,6 +12,16 @@ interface JobHelperResult {
   valueProps: string[];
   coverLetter: string;
   screeningResponses: { question: string; answer: string }[];
+  autoFill: {
+    coreProfile: {
+      headline: string;
+      oneLiner: string;
+      skills: string[];
+    };
+    formResponses: { fieldLabel: string; recommendedValue: string }[];
+    screeningShortForm: { question: string; answer: string }[];
+    followUpEmail: string;
+  };
 }
 
 const defaultFocus =
@@ -25,6 +35,7 @@ export default function JobsClient() {
   const [focusAreas, setFocusAreas] = useState(defaultFocus);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<JobHelperResult | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const { publish } = useToast();
 
@@ -65,6 +76,33 @@ export default function JobsClient() {
     }
   };
 
+  const copyToClipboard = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(label);
+      publish(`${label} copied`, "success");
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      publish("Unable to copy to clipboard", "error");
+    }
+  };
+
+  const renderCopyButton = (label: string, value: string, size: "sm" | "xs" = "sm") => (
+    <Button
+      type="button"
+      intent="ghost"
+      size={size}
+      onClick={() => copyToClipboard(label, value)}
+    >
+      {copiedField === label ? (
+        <ClipboardCheck className="h-4 w-4" />
+      ) : (
+        <Clipboard className="h-4 w-4" />
+      )}
+      Copy
+    </Button>
+  );
+
   return (
     <div className="space-y-10">
       <header className="space-y-3">
@@ -73,8 +111,8 @@ export default function JobsClient() {
         </h1>
         <p className="text-sm leading-relaxed text-slate-300">
           Paste the job description, add a quick summary of your experience, and let the
-          AI draft targeted value props, a recruiter-ready summary, and screen answers.
-          Everything is saved to your history so you can iterate later.
+          AI draft targeted value props, recruiter-ready answers, and auto-fill
+          suggestions for common forms.
         </p>
       </header>
 
@@ -156,6 +194,7 @@ export default function JobsClient() {
             <p className="text-sm leading-relaxed text-slate-300">
               {result.applicationSummary}
             </p>
+            {renderCopyButton("Summary", result.applicationSummary)}
           </div>
 
           <div className="space-y-3">
@@ -165,6 +204,7 @@ export default function JobsClient() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
+            {renderCopyButton("Value props", result.valueProps.join("\n"))}
           </div>
 
           <div className="space-y-3">
@@ -172,6 +212,7 @@ export default function JobsClient() {
             <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-line">
               {result.coverLetter}
             </p>
+            {renderCopyButton("Cover letter", result.coverLetter)}
           </div>
 
           <div className="space-y-3">
@@ -180,16 +221,91 @@ export default function JobsClient() {
               {result.screeningResponses.map(({ question, answer }) => (
                 <div
                   key={question}
-                  className="rounded-xl border border-slate-800 bg-slate-950/70 p-4"
+                  className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4"
                 >
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     {question}
                   </p>
-                  <p className="mt-2 leading-relaxed text-slate-300 whitespace-pre-line">
+                  <p className="leading-relaxed text-slate-300 whitespace-pre-line">
                     {answer}
                   </p>
+                  {renderCopyButton(question, answer, "xs")}
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-3xl border border-slate-800/60 bg-slate-950/50 p-6">
+            <h3 className="text-sm font-semibold text-slate-200">
+              Auto-apply form responses
+            </h3>
+            <div className="space-y-3 text-xs text-slate-400">
+              <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-200">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                  Core profile
+                </p>
+                <p className="mt-1 font-semibold text-slate-100">
+                  {result.autoFill.coreProfile.headline}
+                </p>
+                <p className="mt-1 leading-relaxed text-slate-300">
+                  {result.autoFill.coreProfile.oneLiner}
+                </p>
+                <p className="mt-2 text-[11px] text-slate-500">
+                  Top skills: {result.autoFill.coreProfile.skills.join(", ")}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                  Form field suggestions
+                </p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {result.autoFill.formResponses.map((item) => (
+                    <div
+                      key={item.fieldLabel}
+                      className="rounded-lg border border-slate-800 bg-slate-950/60 p-3"
+                    >
+                      <p className="text-xs font-semibold text-slate-200">
+                        {item.fieldLabel}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        {item.recommendedValue}
+                      </p>
+                      {renderCopyButton(item.fieldLabel, item.recommendedValue, "xs")}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                  Short-form screening answers
+                </p>
+                <div className="space-y-2">
+                  {result.autoFill.screeningShortForm.map(({ question, answer }) => (
+                    <div
+                      key={question}
+                      className="rounded-lg border border-slate-800 bg-slate-950/60 p-3"
+                    >
+                      <p className="text-xs font-semibold text-slate-200">{question}</p>
+                      <p className="mt-1 text-xs text-slate-300 whitespace-pre-line">
+                        {answer}
+                      </p>
+                      {renderCopyButton(`${question}-short`, answer, "xs")}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                  Follow-up email template
+                </p>
+                <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-line">
+                  {result.autoFill.followUpEmail}
+                </p>
+                {renderCopyButton("Follow-up email", result.autoFill.followUpEmail)}
+              </div>
             </div>
           </div>
         </section>
