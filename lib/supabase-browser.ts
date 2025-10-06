@@ -1,4 +1,4 @@
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 const missingEnvMessage =
   "Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.";
@@ -16,5 +16,8 @@ function resolveSupabaseEnv() {
 
 export function getSupabaseBrowserClient() {
   const { url, anonKey } = resolveSupabaseEnv();
-  return createBrowserClient(url, anonKey);
+  return createBrowserSupabaseClient({
+    supabaseUrl: url,
+    supabaseKey: anonKey,
+  });
 }
