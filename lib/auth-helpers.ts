@@ -6,7 +6,31 @@ import {
   getSupabaseServerComponentClient,
 } from "./supabase-server";
 
+function hasSupabaseEnv() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
+
+function stubSession() {
+  return {
+    session: null as Session | null,
+    supabase: null as unknown as TypedSupabaseClient,
+  };
+}
+
 export async function requireServerSession() {
+  if (!hasSupabaseEnv()) {
+    // Allow unauthenticated access in dev mode when Supabase isn't configured yet.
+    if (process.env.NEXT_PUBLIC_DEV_MODE === "1") {
+      return stubSession();
+    }
+
+    throw new Error(
+      "Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.",
+    );
+  }
+
   const supabase = getSupabaseServerComponentClient();
   const {
     data: { session },
@@ -20,6 +44,16 @@ export async function requireServerSession() {
 }
 
 export async function getOptionalServerSession() {
+  if (!hasSupabaseEnv()) {
+    if (process.env.NEXT_PUBLIC_DEV_MODE === "1") {
+      return stubSession();
+    }
+
+    throw new Error(
+      "Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.",
+    );
+  }
+
   const supabase = getSupabaseServerComponentClient();
   const {
     data: { session },
@@ -32,6 +66,16 @@ export async function getOptionalServerSession() {
 }
 
 export async function getRouteHandlerSession() {
+  if (!hasSupabaseEnv()) {
+    if (process.env.NEXT_PUBLIC_DEV_MODE === "1") {
+      return stubSession();
+    }
+
+    throw new Error(
+      "Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.",
+    );
+  }
+
   const supabase = getSupabaseRouteHandlerClient();
   const {
     data: { session },
