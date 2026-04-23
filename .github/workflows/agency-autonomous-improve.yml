@@ -1,0 +1,93 @@
+name: Agency Autonomous Improve
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 14 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  improve:
+    name: Create next improvement PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Ensure labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create agent-improvement --color 5319E7 --description "Autonomous agent improvement PR" || true
+          gh label create output-ready --color 0E8A16 --description "Output readiness work" || true
+
+      - name: Check existing agent PR
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count="$(gh pr list --state open --label agent-improvement --json number --jq 'length')"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Apply next improvement
+        if: steps.existing.outputs.count == '0'
+        run: pnpm agents:improve
+        env:
+          AGENCY_MAX_CHANGES: "1"
+
+      - name: Verify readiness
+        if: steps.existing.outputs.count == '0'
+        run: pnpm agents:build
+        env:
+          NEXT_PUBLIC_DEV_MODE: "1"
+
+      - name: Create pull request
+        if: steps.existing.outputs.count == '0'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ github.token }}
+          branch: codex/agency-autonomous-improve
+          delete-branch: true
+          title: "Agent improvement: harden next route state"
+          commit-message: "Agent improvement: harden next route state"
+          labels: agent-improvement, output-ready
+          body: |
+            Automated agency improvement pass.
+
+            The agent loop applied the next small product-hardening change, then ran:
+            - `pnpm agents:improve`
+            - `pnpm agents:build`
+
+            Review the diff, merge if the change is appropriate, and the next scheduled run will continue with the next improvement candidate.
+
+      - name: Leave status issue when PR already exists
+        if: steps.existing.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Agent improvement waiting on open PR"
+          body="The autonomous agent loop found an existing open PR with label agent-improvement. Review and merge or close it before the next improvement PR is created."
+          existing="$(gh issue list --state open --label agent-improvement --search "$title in:title" --json number --jq '.[0].number')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label agent-improvement --body "$body"
+          fi

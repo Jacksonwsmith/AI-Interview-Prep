@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "agents:build": "node scripts/agency-continuous-build.mjs",
+    "agents:improve": "node scripts/agency-autonomous-improve.mjs",
     "format": "prettier --write .",
     "supabase:start": "supabase start",
     "supabase:status": "supabase status -o env",
