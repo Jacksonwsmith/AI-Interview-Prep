@@ -1,22 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 
 import "@/styles/globals.css";
 
 import LogoutButton from "@/components/LogoutButton";
+import LogoMark from "@/components/LogoMark";
 import { ToastProvider } from "@/components/ToastProvider";
 import { buttonStyles } from "@/components/Button";
 import { getOptionalServerSession, isAdminEmail } from "@/lib/auth-helpers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -32,13 +41,13 @@ export default async function RootLayout({
   const { session } = await getOptionalServerSession();
 
   const navLinks = [
-    { href: "/resume-review", label: "Resume review" },
-    { href: "/interview-prep", label: "Interview prep" },
-    { href: "/tracker", label: "Tracker" },
+    { href: "/resume-review", label: "Resume" },
     { href: "/practice", label: "Practice" },
+    { href: "/projects", label: "Projects" },
+    { href: "/interview-stories", label: "Stories" },
+    { href: "/coffee-chats", label: "Coffee chats" },
+    { href: "/tracker", label: "Tracker" },
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/about", label: "About" },
-    { href: "/privacy", label: "Privacy" },
   ];
 
   if (session) {
@@ -54,24 +63,27 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} text-slate-100 antialiased`}
+        className={`${inter.variable} ${fraunces.variable} ${jetBrainsMono.variable} text-slate-100 antialiased`}
       >
         <ToastProvider>
           <div className="flex min-h-screen flex-col">
             <header className="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-900/65 backdrop-blur-xl">
-              <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4">
+              <nav className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3">
                 <Link
                   href="/"
-                  className="text-lg font-semibold tracking-tight text-white transition hover:text-[#ffd76a]"
+                  className="inline-flex items-center gap-2.5 transition hover:text-[#a5543f]"
                 >
-                  Hire Ground
+                  <LogoMark />
+                  <span className="font-display text-xl font-semibold tracking-tight">
+                    Hire Ground
+                  </span>
                 </Link>
-                <div className="flex items-center gap-1 text-sm font-medium">
+                <div className="flex max-w-[76vw] items-center gap-1 overflow-x-auto rounded-full border border-slate-800/60 bg-[#fffaf2]/70 p-1 text-sm font-medium shadow-sm">
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="rounded-md px-3 py-2 text-slate-300 transition hover:text-white"
+                      className="shrink-0 rounded-full px-3 py-1.5 text-slate-300 transition hover:bg-[#efe4d3] hover:text-[#261f19]"
                     >
                       {link.label}
                     </Link>
@@ -91,7 +103,7 @@ export default async function RootLayout({
                 </div>
               </nav>
             </header>
-            <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 md:py-16">
+            <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 md:py-14">
               {children}
             </main>
             <footer className="border-t border-slate-800/70 bg-slate-900/70 py-6">
@@ -100,6 +112,20 @@ export default async function RootLayout({
                   © {new Date().getFullYear()} Hire Ground. Prep with intention.
                 </p>
                 <p className="flex items-center gap-3">
+                  <Link
+                    href="/about"
+                    className="transition hover:text-slate-300"
+                  >
+                    About
+                  </Link>
+                  <span className="text-slate-600">|</span>
+                  <Link
+                    href="/privacy"
+                    className="transition hover:text-slate-300"
+                  >
+                    Privacy
+                  </Link>
+                  <span className="text-slate-600">|</span>
                   <Link
                     href="https://supabase.com"
                     className="transition hover:text-slate-300"

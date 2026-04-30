@@ -17,9 +17,9 @@ export default function WorkflowRail({ current }: WorkflowRailProps) {
   return (
     <nav
       aria-label="Workflow progress"
-      className="rounded-2xl border border-slate-800/60 bg-slate-950/60 p-3"
+      className="rounded-full border border-slate-800/60 bg-slate-950/60 p-2 shadow-sm"
     >
-      <ol className="flex flex-wrap items-center gap-2">
+      <ol className="flex flex-wrap items-center gap-1.5">
         {steps.map((step, index) => {
           const isCurrent = step.id === current;
           return (
@@ -27,10 +27,10 @@ export default function WorkflowRail({ current }: WorkflowRailProps) {
               <Link
                 href={step.href}
                 aria-current={isCurrent ? "step" : undefined}
-                className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition ${
+                className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
                   isCurrent
-                    ? "border-[#eaaa00]/55 bg-[#eaaa00]/15 text-[#ffe49a]"
-                    : "border-slate-700 text-slate-300 hover:border-[#eaaa00]/50 hover:text-[#ffe49a]"
+                    ? "border-[#b85f43]/45 bg-[#ead7c5] text-[#261f19]"
+                    : "border-transparent text-slate-300 hover:border-[#b85f43]/30 hover:bg-[#f3e8d7] hover:text-[#261f19]"
                 }`}
               >
                 {index + 1}. {step.label}

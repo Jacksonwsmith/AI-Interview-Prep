@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, ClipboardCheck, Mic, Sparkles } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Coffee, MessageCircle, Mic, Route } from "lucide-react";
 
 import { buttonStyles } from "@/components/Button";
 import { getOptionalServerSession } from "@/lib/auth-helpers";
+import { interviewStories } from "@/lib/interview-stories";
+import { projectAreas } from "@/lib/project-ideas";
 
 const featureList = [
   {
@@ -67,19 +69,13 @@ export default async function Home() {
 
   return (
     <div className="space-y-16 pb-12">
-      <section className="relative overflow-hidden rounded-[2rem] border border-slate-800/60 bg-gradient-to-br from-[#001a3a] via-[#002855] to-[#011025] p-12 text-white shadow-[0_30px_80px_-55px_rgba(15,23,42,0.9)]">
-        <div className="absolute inset-0">
-          <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-[#eaaa00]/20 blur-[140px]" />
-          <div className="absolute bottom-[-80px] right-12 h-72 w-72 rounded-full bg-[#004a98]/30 blur-[140px]" />
-        </div>
-        <div className="relative space-y-6">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100">
-            <Sparkles className="h-3.5 w-3.5" /> Hire Ground
-          </p>
-          <h1 className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">
-            Record a sharper story. Ship answers you trust.
+      <section className="relative overflow-hidden border-b border-slate-800/60 pb-14 pt-10">
+        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+          <div className="space-y-7">
+          <h1 className="font-display max-w-3xl text-5xl font-semibold leading-[0.98] text-slate-50 sm:text-6xl">
+            Hire Ground for interviews that sound like you.
           </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-slate-100/85">
+          <p className="max-w-2xl text-lg leading-8 text-slate-300">
             Practice the way the real conversation happens: voice-first, question by
             question. Each run gives you targeted STAR feedback, highlights what to fix,
             and saves the transcript so you can track momentum over time.
@@ -87,33 +83,35 @@ export default async function Home() {
           <div className="flex flex-wrap gap-4">
             <Link
               href={primaryCta.href}
-              className={`${buttonStyles({ intent: "primary", size: "lg" })} shadow-[0_20px_45px_-18px_rgba(234,170,0,0.45)]`}
+              className={buttonStyles({ intent: "primary", size: "lg" })}
             >
               {primaryCta.label}
             </Link>
             <Link
               href="/practice"
-              className={`${buttonStyles({ intent: "secondary", size: "lg" })} border-white/25 text-white hover:border-white/50`}
+              className={buttonStyles({ intent: "secondary", size: "lg" })}
             >
               Explore the flow
             </Link>
           </div>
-          <dl className="grid gap-4 text-xs text-white/70 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-              <dt className="uppercase tracking-wide">Interview modes</dt>
-              <dd className="mt-1 text-lg font-semibold text-white">
+          </div>
+
+          <dl className="grid gap-3 rounded-[1.75rem] border border-slate-800/60 bg-slate-950/60 p-4 text-xs text-slate-400 shadow-lg">
+            <div className="rounded-2xl border border-slate-800/60 bg-[#fffaf2] px-4 py-4">
+              <dt className="font-semibold uppercase">Interview modes</dt>
+              <dd className="mt-2 text-xl font-semibold text-slate-100">
                 Behavioral · Situational · Technical
               </dd>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-              <dt className="uppercase tracking-wide">Answer cadence</dt>
-              <dd className="mt-1 text-lg font-semibold text-white">
+            <div className="rounded-2xl border border-slate-800/60 bg-[#fffaf2] px-4 py-4">
+              <dt className="font-semibold uppercase">Answer cadence</dt>
+              <dd className="mt-2 text-xl font-semibold text-slate-100">
                 One question at a time
               </dd>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-              <dt className="uppercase tracking-wide">Feedback turnaround</dt>
-              <dd className="mt-1 text-lg font-semibold text-white">Under 30 seconds</dd>
+            <div className="rounded-2xl border border-slate-800/60 bg-[#fffaf2] px-4 py-4">
+              <dt className="font-semibold uppercase">Feedback turnaround</dt>
+              <dd className="mt-2 text-xl font-semibold text-slate-100">Under 30 seconds</dd>
             </div>
           </dl>
         </div>
@@ -133,6 +131,139 @@ export default async function Home() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="space-y-6 rounded-3xl border border-slate-800/60 bg-slate-950/70 p-6">
+        <div className="grid gap-4 md:grid-cols-[0.85fr_1.15fr] md:items-end">
+          <div>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-slate-100">
+              Build resume-worthy projects for the roles you want.
+            </h2>
+          </div>
+          <p className="text-sm leading-6 text-slate-300">
+            Get project ideas matched to target industries, with practical walkthroughs
+            and relevant tech stacks so your resume shows proof, not just interest.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {projectAreas.map((area) => {
+            const idea = area.projects[0];
+            return (
+            <Link
+              key={area.industry}
+              href={`/projects/${area.slug}`}
+              className="flex min-h-full flex-col rounded-2xl border border-slate-800/60 bg-[#fffaf2] p-5 shadow-lg transition hover:-translate-y-1 hover:border-[#b85f43]/45 hover:shadow-[0_26px_62px_-42px_rgba(61,42,30,0.7)]"
+            >
+              <p className="text-xs font-semibold uppercase text-slate-500">
+                {area.industry}
+              </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-100">
+                {idea.project}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{idea.description}</p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {idea.tech.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded-full border border-[#cdbca6] bg-[#f3e8d7] px-2.5 py-1 text-xs font-medium text-[#261f19]"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-5 border-t border-slate-800/60 pt-4">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+                  <Route className="h-3.5 w-3.5 text-[#8f3e2e]" />
+                  Walkthrough
+                </p>
+                <ol className="mt-3 space-y-2 text-sm text-slate-300">
+                  {idea.walkthrough.map((step, index) => (
+                    <li key={step} className="flex gap-2">
+                      <span className="font-semibold text-[#8f3e2e]">
+                        {index + 1}.
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#8f3e2e]">
+                View more {area.industry.toLowerCase()} projects
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/70 p-6 shadow-lg">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+                <MessageCircle className="h-4 w-4 text-[#8f3e2e]" />
+                Interview stories
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-100">
+                Learn from real interview recaps.
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                A reddit-style board where candidates can share interview questions,
+                role context, surprises, and advice for the next person.
+              </p>
+            </div>
+            <Link
+              href="/interview-stories"
+              className={buttonStyles({ intent: "secondary", size: "sm" })}
+            >
+              Open stories
+            </Link>
+          </div>
+          <div className="mt-5 space-y-3">
+            {interviewStories.slice(0, 2).map((story) => (
+              <Link
+                href="/interview-stories"
+                key={story.title}
+                className="block rounded-2xl border border-slate-800/60 bg-[#fffaf2] p-4 transition hover:border-[#b85f43]/40"
+              >
+                <p className="text-xs font-semibold uppercase text-slate-500">
+                  {story.role} · {story.companyType}
+                </p>
+                <h3 className="mt-1 text-base font-semibold text-slate-100">
+                  {story.title}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-300">
+                  {story.summary}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          href="/coffee-chats"
+          className="rounded-3xl border border-dashed border-[#b85f43]/35 bg-[#ead7c5] p-6 shadow-lg transition hover:-translate-y-1"
+        >
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+            <Coffee className="h-4 w-4 text-[#8f3e2e]" />
+            Under construction
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-slate-100">
+            Request coffee chats with consultants.
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            A future matching flow where candidates can request conversations with real
+            consultants from a database filtered by industry, role, and goals.
+          </p>
+          <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#8f3e2e]">
+            Preview the flow
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
       </section>
 
       <section className="space-y-6 rounded-3xl border border-slate-800/60 bg-slate-950/70 p-6">

@@ -10,6 +10,21 @@ export default function AboutPage() {
       </header>
 
       <section className="space-y-3 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-5">
+        <h2 className="text-lg font-semibold text-slate-100">Our story</h2>
+        <p className="text-sm leading-6 text-slate-300">
+          Hire Ground started as a personal tool. The creator was preparing for Big 4
+          interviews and needed a better way to turn job descriptions, resume bullets,
+          and practice answers into a focused prep routine.
+        </p>
+        <p className="text-sm leading-6 text-slate-300">
+          That process worked. They landed the job, then kept building Hire Ground so
+          other candidates could practice with the same clarity: know what the role is
+          asking for, sharpen the story, rehearse out loud, and walk into the interview
+          with momentum.
+        </p>
+      </section>
+
+      <section className="space-y-3 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-5">
         <h2 className="text-lg font-semibold text-slate-100">What this product includes</h2>
         <ul className="list-disc space-y-1 pl-5 text-sm text-slate-300">
           <li>Voice-first interview practice and STAR feedback.</li>

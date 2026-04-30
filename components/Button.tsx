@@ -3,17 +3,17 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export const buttonStyles = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-70",
+  "inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-70",
   {
     variants: {
       intent: {
         primary:
-          "bg-[#002855] text-[#f7f3e8] hover:bg-[#004a98] focus-visible:outline-[#eaaa00]",
+          "border border-[#b85f43]/35 bg-[#ead7c5] text-[#261f19] shadow-[0_16px_36px_-24px_rgba(38,31,25,0.45)] hover:bg-[#e1c9b2] focus-visible:outline-[#b85f43]",
         secondary:
-          "border border-[#eaaa00]/40 bg-slate-900 text-[#f7d77c] hover:border-[#eaaa00]/70 hover:text-[#ffe7a6] focus-visible:outline-[#eaaa00]",
+          "border border-[#cdbca6] bg-[#fffaf2]/80 text-[#261f19] hover:border-[#b85f43]/50 hover:bg-[#f3e8d7] focus-visible:outline-[#b85f43]",
         subtle:
-          "bg-slate-800/80 text-slate-100 hover:bg-slate-700/60 focus-visible:outline-slate-300",
-        ghost: "text-[#d2dce8] hover:text-[#ffd76a]",
+          "bg-[#ead7c5] text-[#261f19] hover:bg-[#e1c9b2] focus-visible:outline-[#b85f43]",
+        ghost: "text-[#8f3e2e] hover:text-[#261f19]",
       },
       size: {
         sm: "px-3 py-1.5",
